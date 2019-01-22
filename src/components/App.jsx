@@ -3,6 +3,7 @@ import 'isomorphic-fetch';
 import 'es6-promise';
 import { Container, Row, Col, Button } from 'reactstrap';
 import FilmCard from './FilmCard';
+import PeopleCard from './PeopleCard';
 
 class App extends Component {
 
@@ -10,7 +11,8 @@ class App extends Component {
         super(props);
         this.state = {
             films: [],
-            hasLoaded: false
+            people: [],
+            hasLoaded: null
         };
     }
 
@@ -20,6 +22,12 @@ class App extends Component {
             let films = await res.json();
             this.setState({ films });
             console.log(films);
+
+            let res2 = await fetch('https://ghibliapi.herokuapp.com/people');
+            let people = await res2.json();
+            this.setState({ people });
+            console.log(people);
+
         } catch (e) {
             console.log(e);
         }
@@ -31,11 +39,32 @@ class App extends Component {
         })
     }
 
+    renderPeople() {
+        return this.state.people.map(person => {
+            return <PeopleCard key={person.id} person={person} />
+        })
+    }
+
     handleToggle() {
         this.setState({ hasLoaded: true });
     }
 
+    handleToggle2() {
+        this.setState({ hasLoaded: false });
+    }
+
     render() {
+        if (this.state.hasLoaded === false) {
+            return (
+                <>
+                    <Container fluid className="bg-info">
+                        <Row>
+                            {this.renderPeople()}
+                        </Row>
+                    </Container>
+                </>
+            );
+        }
         if (this.state.hasLoaded === true) {
             return (
                 <>
@@ -59,6 +88,12 @@ class App extends Component {
                                     outline color="dark"
                                     size="lg"
                                 >Load Films</Button>
+                                <Button
+                                    onClick={(e) => this.handleToggle2(e.target)}
+                                    className="mx-auto d-block mb-2"
+                                    outline color="dark"
+                                    size="lg"
+                                >Load People</Button>
                             </Col>
                         </Row>
                     </Container>
